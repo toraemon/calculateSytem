@@ -2,38 +2,34 @@ package calculateSystem;
 
 import java.io.*;
 import java.util.*;
-import static calculateSystem.Branch.writeOutputBranchFile;
-import static calculateSystem.Commodity.writeOutputCommodityFile;
-import static calculateSystem.Definition.calculateSales;
-import static calculateSystem.Sales.searchSalesFile;
-import static calculateSystem.Sales.readSalesFile;
+
+import static calculateSystem.Sales.*;
 
 public class CalculateSales {
-	public static void main(String... args) throws IOException{
-		Definition defBranch = new Branch();
-		Definition defCommodity = new Commodity();
+	public static void main(String... args){
 		try{
-			// 支店定義ファイルの読み込み
-			List<Definition> branch = defBranch.readDefinitionFile(args[0], "branch");
-			// 商品定義ファイルの読み込み
-			List<Definition> commodity = defCommodity.readDefinitionFile(args[0], "commodity");
+			// インスタンス生成
+			Branch def1 = new Branch();
+			Commodity def2 = new Commodity();
+			// 定義ファイル読み込み
+			def1.readDefinitionFile(args[0], "branch");
+			def2.readDefinitionFile(args[0], "commodity");
+
 			// 売上ファイルを検索
 			List<File> fileList = searchSalesFile(args[0]);
-			// 売上ファイルの読み込み
-			List<Sales> readSales = readSalesFile(fileList);
-			// 支店売上ファイルの集計
-			//defBranch.calculateSales(branch, readSales);
-			// 商品売上ファイルの集計
-			//defCommodity.calculateSales(commodity, readSales);
-			calculateSales(branch, commodity, readSales);
-			// 支店売上ファイル書き出し
-			writeOutputBranchFile(args[0], branch, "branch");
-			// 商品売上ファイル書き出し
-			writeOutputCommodityFile(args[0], commodity, "commodity");
-		}catch(IOException e){
+			// 売上ファイル読み込み
+			List<Sales> readSalesFile = readSalesFile(fileList);
+			// 売上ファイルを集計する処理
+			def1.calculateSales(readSalesFile);	// 支店別
+			def2.calculateSales(readSalesFile);	// 商品別
+			// 集計ファイルに出力する処理
+			def1.writeOutputFile(args[0], "branch");		// 支店別
+			def2.writeOutputFile(args[0], "commodity");	// 商品別
+		}catch(Exception e){
 			e.printStackTrace();
-		}finally{
-			System.out.println("処理が終了しました。");
+			System.err.println("エラーが発生しました。\n処理を中断します。");
+			System.exit(1);
 		}
+		System.out.println("終了");
 	}
 }
